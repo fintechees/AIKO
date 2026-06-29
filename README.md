@@ -78,3 +78,7 @@ In short:
 > HTML tells browsers how to render a page.
 
 > AIKO tells AI how knowledge is organized inside it.
+
+> HTML is markup for browsers.
+
+> AIKO is markup for AI.
