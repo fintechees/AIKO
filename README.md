@@ -46,6 +46,8 @@ Every field must answer one question:
 
 If the answer is **No**, the field does **not** belong in AIKO.
 
+> AIKO-UP intentionally exposes very few extension points. If an extension cannot be achieved through aiko_document, it probably belongs in the AI agent rather than the protocol.
+
 ---
 
 ## What AIKO Contains
