@@ -48,6 +48,10 @@ If the answer is **No**, the field does **not** belong in AIKO.
 
 > AIKO-UP intentionally exposes very few extension points. If an extension cannot be achieved through aiko_document, it probably belongs in the AI agent rather than the protocol.
 
+> Anything that can be deterministically reconstructed SHOULD NOT be stored.
+
+> Anything that can be served by the web server SHOULD NOT be served by WordPress.
+
 ---
 
 ## What AIKO Contains
