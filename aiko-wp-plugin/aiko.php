@@ -2,7 +2,7 @@
 /**
  * Plugin Name: AIKO
  * Description: AI Knowledge Observatory Markup
- * Version: 0.1.0
+ * Version: 0.2
  * Author: AIKO Contributors
  */
 
@@ -25,9 +25,28 @@ final class AIKO
 
         add_action('save_post', [self::class, 'onPostSaved'], 20, 3);
 
+        add_action('trashed_post', [self::class, 'onPostDeleted'], 20, 1);
+
         add_action('admin_menu', [self::class, 'adminMenu']);
 
         add_action('template_redirect', [self::class, 'serveWellKnown']);
+    }
+
+    public static function serveWellKnown()
+    {
+        if (!isset($_SERVER['REQUEST_URI'])) {
+            return;
+        }
+
+        if ($_SERVER['REQUEST_URI'] !== '/.well-known/aiko.json') {
+            return;
+        }
+
+        header('Content-Type: application/json');
+
+        echo json_encode(self::loadDocuments());
+
+        exit;
     }
 
     /**
@@ -71,7 +90,7 @@ final class AIKO
     {
        $documents = self::loadDocuments();
 
-       $permalink = get_permalink($post);
+       $permalink = $post->post_name;
 
        /*
         * 建立 permalink 索引
@@ -166,7 +185,47 @@ final class AIKO
             return;
         }
 
+        if ($post->post_status !== 'publish') {
+            return;
+        }
+
         self::updateDocument($post);
+    }
+
+    /**
+     * Handle post deletion.
+     */
+    public static function onPostDeleted($post_id)
+    {
+       $post = get_post($post_id);
+
+       if (!$post) {
+           return;
+       }
+
+       if ($post->post_type !== 'post') {
+           return;
+       }
+
+       $permalink = $post->post_name;
+
+       $permalink = preg_replace('/__trashed.*$/', '', $permalink);
+
+       $documents = self::loadDocuments();
+
+       foreach ($documents as $i => $doc) {
+           if (
+               isset($doc['permalink']) &&
+               $doc['permalink'] === $permalink
+           ) {
+               unset($documents[$i]);
+               break;
+           }
+       }
+
+       $documents = array_values($documents);
+
+       self::publish($documents);
     }
 
     /**
@@ -249,7 +308,7 @@ final class AIKO
 
             'description' => self::description($post),
 
-            'permalink' => get_permalink($post),
+            'permalink' => $post->post_name,
 
             'language' => get_bloginfo('language'),
 
